@@ -224,11 +224,13 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendAsync(msg *model.WXMessage) {
+	fmt.Println("begin SendMessage", msg.Content)
 	word, err := defaultPayload.SendMessage(msg.Content)
 	if err != nil {
 		fmt.Println("[debug] defaultPayload.SendMessage failed, error", err)
 		return
 	}
+	fmt.Println("finish SendMessage", word)
 	customMsg := &WXCustomMessage{
 		ToUser:  msg.FromUserName,
 		Msgtype: "text",
@@ -246,6 +248,7 @@ func SendAsync(msg *model.WXMessage) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
+	fmt.Println("http.DefaultClient.Do", word)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("[debug] error", err)
@@ -256,6 +259,7 @@ func SendAsync(msg *model.WXMessage) {
 		return
 	}
 	defer resp.Body.Close()
+	fmt.Println("finish", word)
 }
 
 type WXCustomMessage struct {
