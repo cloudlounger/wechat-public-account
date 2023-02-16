@@ -157,3 +157,31 @@ func getIndex() (string, error) {
 	}
 	return string(b), nil
 }
+
+func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
+	header := r.Header
+	body := r.Body
+	defer body.Close()
+	appid := header.Get("x-wx-from-appid")
+	if appid == "" {
+		w.WriteHeader(400)
+		return
+	}
+	msg := &model.WXMessage{}
+	b, err := ioutil.ReadAll(body)
+	if err != nil {
+		w.WriteHeader(400)
+		return
+	}
+	err = json.Unmarshal(b, msg)
+	if err != nil {
+		w.WriteHeader(400)
+		return
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	w.WriteHeader(200)
+}
