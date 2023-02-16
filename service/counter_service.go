@@ -266,7 +266,9 @@ func SendAsync(msg *model.WXMessage) {
 		return
 	}
 	defer resp.Body.Close()
-	fmt.Println("finish", word)
+	io.Copy(io.Discard, resp.Body)
+	seqid := resp.Header.Get("x-openapi-seqid")
+	fmt.Println("finish", word, "seqid", seqid)
 }
 
 type WXCustomMessage struct {
