@@ -38,12 +38,13 @@ func pushQueue(msg *model.WXMessage) {
 }
 
 func loopCheck(key string, cancelC <-chan struct{}) (quit bool) {
+	c := time.After(5 * time.Second)
 	for {
 		select {
 		case <-cancelC:
 			quit = true
 			return
-		case <-time.After(5 * time.Second):
+		case <-c:
 			quit = true
 			return
 		default:
