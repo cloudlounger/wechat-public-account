@@ -80,7 +80,7 @@ func (s *Payload) SendMessage(prompt string) (respWord string, err error) {
 type AIResp struct {
 	ID          string       `json:"id"`
 	Object      string       `json:"object"`
-	CreatedTime string       `json:"created"`
+	CreatedTime int          `json:"created"`
 	Choices     []*AIContent `json:"choices"`
 }
 
