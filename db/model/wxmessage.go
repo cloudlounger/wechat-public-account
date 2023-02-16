@@ -80,3 +80,11 @@ func (s *WXMessage) ToResponseJsonString() ([]byte, error) {
 	s.FromUserName = toUserName
 	return json.Marshal(s)
 }
+
+func (s *WXMessage) ToResponseJsonStringWithOpenAI(respWord string) ([]byte, error) {
+	toUserName := s.ToUserName
+	s.ToUserName = s.FromUserName
+	s.FromUserName = toUserName
+	s.Content = respWord
+	return json.Marshal(s)
+}

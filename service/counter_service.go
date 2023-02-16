@@ -199,7 +199,18 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	*/
-	b, err = msg.ToResponseJsonString()
+	//b, err = msg.ToResponseJsonString()
+	//if err != nil {
+	//	w.WriteHeader(500)
+	//	return
+	//}
+	word, err := defaultPayload.SendMessage(msg.Content)
+	if err != nil {
+		fmt.Println("[debug] defaultPayload.SendMessage failed, error", err)
+		w.WriteHeader(500)
+		return
+	}
+	b, err = msg.ToResponseJsonStringWithOpenAI(word)
 	if err != nil {
 		w.WriteHeader(500)
 		return
