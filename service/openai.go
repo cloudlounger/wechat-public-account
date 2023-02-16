@@ -47,7 +47,7 @@ func loopCheck(key string, ctx context.Context) (quit bool) {
 		default:
 		}
 		if _, ok := cache.Load(key); ok {
-			time.Sleep(200 * time.Second)
+			time.Sleep(200 * time.Millisecond)
 		} else {
 			return
 		}
