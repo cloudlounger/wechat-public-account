@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -162,7 +161,7 @@ func getIndex() (string, error) {
 
 func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("-----------accept WXMessageHandler message")
-	//header := r.Header
+	header := r.Header
 	body := r.Body
 	defer body.Close()
 	//appid := header.Get("x-wx-from-appid")
@@ -171,6 +170,12 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(400)
 	//	return
 	//}
+	openid := header.Get("x-wx-openid")
+	if openid == "" {
+		fmt.Println("-----------empty openid")
+		w.WriteHeader(400)
+		return
+	}
 	msg := &model.WXMessage{}
 	b, err := ioutil.ReadAll(body)
 	if err != nil && err != io.EOF {
@@ -184,11 +189,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("-----------success %+v\n", msg)
-	xmlb, err := xml.Marshal(msg)
-	if err != nil {
-		w.WriteHeader(500)
-		return
-	}
+	xmlb := msg.ToResponseXMLString(openid)
 	fmt.Println("-----------xml", xmlb)
 	_, err = w.Write(xmlb)
 	if err != nil {

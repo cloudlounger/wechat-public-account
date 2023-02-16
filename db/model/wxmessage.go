@@ -1,5 +1,10 @@
 package model
 
+import (
+	"strconv"
+	"strings"
+)
+
 type WXMessage struct {
 	ToUserName   string       `json:"ToUserName" xml:"ToUserName"`
 	FromUserName string       `json:"FromUserName" xml:"FromUserName"`
@@ -40,4 +45,31 @@ type WXArticle struct {
 	Description string `json:"Description" xml:"Description"`
 	PicUrl      string `json:"PicUrl" xml:"PicUrl"`
 	Url         string `json:"Url" xml:"Url"`
+}
+
+func (s *WXMessage) ToResponseXMLString(openid string) []byte {
+	fromUser := "wx135884685695463d"
+	var ret strings.Builder
+	ret.WriteString("<xml>\n")
+
+	ret.WriteString("<ToUserName><![CDATA[")
+	ret.WriteString(openid)
+	ret.WriteString("]]></ToUserName>\n")
+
+	ret.WriteString("<FromUserName><![CDATA[")
+	ret.WriteString(fromUser)
+	ret.WriteString("]]></FromUserName>\n")
+
+	ret.WriteString("<CreateTime>")
+	ret.WriteString(strconv.Itoa(int(s.CreateTime)))
+	ret.WriteString("</CreateTime>\n")
+
+	ret.WriteString("<MsgType><![CDATA[text]]></MsgType>\n")
+
+	ret.WriteString("<Content><![CDATA[")
+	ret.WriteString(s.Content)
+	ret.WriteString("]]></Content>\n")
+
+	ret.WriteString("</xml>")
+	return nil
 }
