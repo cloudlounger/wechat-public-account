@@ -173,6 +173,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+	fmt.Println("-----------success", msg)
 	err = json.Unmarshal(b, msg)
 	if err != nil {
 		w.WriteHeader(400)
