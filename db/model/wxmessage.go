@@ -71,5 +71,5 @@ func (s *WXMessage) ToResponseXMLString(openid string) []byte {
 	ret.WriteString("]]></Content>\n")
 
 	ret.WriteString("</xml>")
-	return nil
+	return []byte(ret.String())
 }
