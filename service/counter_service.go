@@ -196,7 +196,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		cache.Store(key, struct{}{})
 	}
 	pushQueue(msg)
-	quit := loopCheck(key, r.Context())
+	quit := loopCheck(key, r.Cancel)
 	if quit {
 		fmt.Println("-----------loopCheck quit")
 		return
