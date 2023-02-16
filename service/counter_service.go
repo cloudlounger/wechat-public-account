@@ -190,13 +190,23 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("-----------success %+v\n", msg)
-	xmlb := msg.ToResponseXMLString()
-	fmt.Println("-----------xml", xmlb)
-	_, err = w.Write(xmlb)
+	/*
+		xmlb := msg.ToResponseXMLString()
+		fmt.Println("-----------xml", xmlb)
+		_, err = w.Write(xmlb)
+		if err != nil {
+			w.WriteHeader(500)
+			return
+		}
+	*/
+	b, err = msg.ToResponseJsonString()
 	if err != nil {
 		w.WriteHeader(500)
 		return
 	}
+	w.Write(b)
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 )
@@ -71,4 +72,11 @@ func (s *WXMessage) ToResponseXMLString() []byte {
 
 	ret.WriteString("</xml>")
 	return []byte(ret.String())
+}
+
+func (s *WXMessage) ToResponseJsonString() ([]byte, error) {
+	toUserName := s.ToUserName
+	s.ToUserName = s.FromUserName
+	s.FromUserName = toUserName
+	return json.Marshal(s)
 }
