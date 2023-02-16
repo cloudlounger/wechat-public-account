@@ -183,7 +183,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	fmt.Println("-----------success", msg)
+	fmt.Printf("-----------success %+v\n", msg)
 	xmlb, err := xml.Marshal(msg)
 	if err != nil {
 		w.WriteHeader(500)
