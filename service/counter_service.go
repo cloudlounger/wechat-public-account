@@ -176,6 +176,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+	fmt.Println("-----------x-wx-openid", openid)
 	msg := &model.WXMessage{}
 	b, err := ioutil.ReadAll(body)
 	if err != nil && err != io.EOF {
@@ -189,7 +190,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("-----------success %+v\n", msg)
-	xmlb := msg.ToResponseXMLString(openid)
+	xmlb := msg.ToResponseXMLString()
 	fmt.Println("-----------xml", xmlb)
 	_, err = w.Write(xmlb)
 	if err != nil {

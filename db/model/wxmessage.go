@@ -47,17 +47,16 @@ type WXArticle struct {
 	Url         string `json:"Url" xml:"Url"`
 }
 
-func (s *WXMessage) ToResponseXMLString(openid string) []byte {
-	fromUser := "wx135884685695463d"
+func (s *WXMessage) ToResponseXMLString() []byte {
 	var ret strings.Builder
 	ret.WriteString("<xml>\n")
 
 	ret.WriteString("<ToUserName><![CDATA[")
-	ret.WriteString(openid)
+	ret.WriteString(s.FromUserName)
 	ret.WriteString("]]></ToUserName>\n")
 
 	ret.WriteString("<FromUserName><![CDATA[")
-	ret.WriteString(fromUser)
+	ret.WriteString(s.ToUserName)
 	ret.WriteString("]]></FromUserName>\n")
 
 	ret.WriteString("<CreateTime>")
