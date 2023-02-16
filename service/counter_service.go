@@ -177,19 +177,18 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	fmt.Println("-----------success", msg)
 	err = json.Unmarshal(b, msg)
 	if err != nil {
 		w.WriteHeader(400)
 		return
 	}
+	fmt.Println("-----------success", msg)
 	_, err = w.Write(b)
 	if err != nil {
 		w.WriteHeader(500)
 		return
 	}
 	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(200)
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
