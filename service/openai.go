@@ -44,7 +44,6 @@ func (s *Payload) SendMessage(prompt string) (respWord string, err error) {
 		return
 	}
 	body := bytes.NewReader(payloadBytes)
-
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", body)
 	if err != nil {
 		fmt.Println("[debug] error", err)

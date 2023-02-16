@@ -204,8 +204,15 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(500)
 	//	return
 	//}
+	msgbackup := &model.WXMessage{
+		ToUserName:   msg.ToUserName,
+		FromUserName: msg.FromUserName,
+		CreateTime:   msg.CreateTime,
+		MsgType:      msg.MsgType,
+		Content:      msg.Content,
+	}
 	go func() {
-		SendAsync(msg)
+		SendAsync(msgbackup)
 	}()
 	word := "异步调用openai中, 请耐心等待"
 	b, err = msg.ToResponseJsonStringWithOpenAI(word)
