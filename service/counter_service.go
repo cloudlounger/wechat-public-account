@@ -212,10 +212,14 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	w.Write(b)
 	w.Header().Set("content-type", "application/json")
+	_, err = w.Write(b)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
 	result.Delete(key)
-	fmt.Println("-----------return", v.(string))
+	fmt.Println("-----------return", msg)
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
