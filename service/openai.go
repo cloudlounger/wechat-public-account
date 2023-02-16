@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const ASAK = "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"
+const ASAK = "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"
 
 var defaultPayload *Payload
 
