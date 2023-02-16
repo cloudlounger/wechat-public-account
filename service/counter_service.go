@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -183,12 +184,17 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("-----------success", msg)
-	_, err = w.Write(b)
+	xmlb, err := xml.Marshal(msg)
 	if err != nil {
 		w.WriteHeader(500)
 		return
 	}
-	w.Header().Set("content-type", "application/json")
+	fmt.Println("-----------xml", xmlb)
+	_, err = w.Write(xmlb)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
