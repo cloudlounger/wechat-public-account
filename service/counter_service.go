@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -160,7 +161,6 @@ func getIndex() (string, error) {
 }
 
 func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("-----------accept WXMessageHandler message")
 	header := r.Header
 	body := r.Body
 	defer body.Close()
@@ -204,12 +204,10 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(500)
 	//	return
 	//}
-	word, err := defaultPayload.SendMessage(msg.Content)
-	if err != nil {
-		fmt.Println("[debug] defaultPayload.SendMessage failed, error", err)
-		w.WriteHeader(500)
-		return
-	}
+	go func() {
+		SendAsync(msg)
+	}()
+	word := "异步调用openai中, 请耐心等待"
 	b, err = msg.ToResponseJsonStringWithOpenAI(word)
 	if err != nil {
 		w.WriteHeader(500)
@@ -217,11 +215,55 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(b)
 	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("-----------hello")
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(200)
+}
+
+func SendAsync(msg *model.WXMessage) {
+	word, err := defaultPayload.SendMessage(msg.Content)
+	if err != nil {
+		fmt.Println("[debug] defaultPayload.SendMessage failed, error", err)
+		return
+	}
+	customMsg := &WXCustomMessage{
+		ToUser:  msg.FromUserName,
+		Msgtype: "text",
+		Text:    WXText{Content: word},
+	}
+	payloadBytes, err := json.Marshal(customMsg)
+	if err != nil {
+		fmt.Println("[debug] error", err)
+		return
+	}
+	body := bytes.NewReader(payloadBytes)
+	req, err := http.NewRequest("POST", "http://api.weixin.qq.com/cgi-bin/message/custom/send", body)
+	if err != nil {
+		fmt.Println("[debug] error", err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("[debug] error", err)
+		return
+	}
+	if resp.StatusCode != 200 {
+		fmt.Println("[debug] error status code, code", resp.StatusCode)
+		return
+	}
+	defer resp.Body.Close()
+}
+
+type WXCustomMessage struct {
+	ToUser  string `json:"touser"`
+	Msgtype string `json:"msgtype"`
+	Text    WXText `json:"text"`
+}
+
+type WXText struct {
+	Content string `json:"content"`
 }

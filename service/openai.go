@@ -57,6 +57,11 @@ func (s *Payload) SendMessage(prompt string) (respWord string, err error) {
 		fmt.Println("[debug] error", err)
 		return
 	}
+	if resp.StatusCode != 200 {
+		err = errors.New("not 200 status code")
+		fmt.Println("[debug] error status code, code", resp.StatusCode)
+		return
+	}
 	defer resp.Body.Close()
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
