@@ -161,15 +161,15 @@ func getIndex() (string, error) {
 
 func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("-----------accept WXMessageHandler message")
-	header := r.Header
+	//header := r.Header
 	body := r.Body
 	defer body.Close()
-	appid := header.Get("x-wx-from-appid")
-	if appid == "" {
-		fmt.Println("-----------empty appid")
-		w.WriteHeader(400)
-		return
-	}
+	//appid := header.Get("x-wx-from-appid")
+	//if appid == "" {
+	//	fmt.Println("-----------empty appid")
+	//	w.WriteHeader(400)
+	//	return
+	//}
 	msg := &model.WXMessage{}
 	b, err := ioutil.ReadAll(body)
 	if err != nil && err != io.EOF {
