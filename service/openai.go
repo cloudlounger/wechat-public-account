@@ -37,11 +37,11 @@ func pushQueue(msg *model.WXMessage) {
 	queue <- msg
 }
 
-func loopCheck(key string, cancelC <-chan struct{}) (quit bool) {
+func loopCheck(key string, done <-chan struct{}) (quit bool) {
 	c := time.After(5 * time.Second)
 	for {
 		select {
-		case <-cancelC:
+		case <-done:
 			quit = true
 			return
 		case <-c:
