@@ -1,12 +1,12 @@
 package service
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 
 	"wxcloudrun-golang/db/dao"
@@ -190,38 +190,29 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("-----------success %+v\n", msg)
-	/*
-		xmlb := msg.ToResponseXMLString()
-		fmt.Println("-----------xml", xmlb)
-		_, err = w.Write(xmlb)
-		if err != nil {
-			w.WriteHeader(500)
-			return
-		}
-	*/
-	//b, err = msg.ToResponseJsonString()
-	//if err != nil {
-	//	w.WriteHeader(500)
-	//	return
-	//}
-	msgbackup := &model.WXMessage{
-		ToUserName:   msg.ToUserName,
-		FromUserName: msg.FromUserName,
-		CreateTime:   msg.CreateTime,
-		MsgType:      msg.MsgType,
-		Content:      msg.Content,
+
+	key := getKey(msg)
+	if _, ok := cache.Load(key); !ok {
+		cache.Store(key, struct{}{})
 	}
-	go func() {
-		SendAsync(msgbackup)
-	}()
-	word := "异步调用openai中, 请耐心等待"
-	b, err = msg.ToResponseJsonStringWithOpenAI(word)
+	pushQueue(msg)
+	quit := loopCheck(key, r.Context())
+	if quit {
+		return
+	}
+	v, ok := result.Load(key)
+	if !ok {
+		w.WriteHeader(500)
+		return
+	}
+	b, err = msg.ToResponseJsonStringWithOpenAI(v.(string))
 	if err != nil {
 		w.WriteHeader(500)
 		return
 	}
 	w.Write(b)
 	w.Header().Set("content-type", "application/json")
+	result.Delete(key)
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
@@ -230,45 +221,15 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func SendAsync(msg *model.WXMessage) {
+func SendAsync(msg *model.WXMessage) string {
 	fmt.Println("begin SendMessage", msg.Content)
 	word, err := defaultPayload.SendMessage(msg.Content)
 	if err != nil {
 		fmt.Println("[debug] defaultPayload.SendMessage failed, error", err)
-		return
+		return ""
 	}
 	fmt.Println("finish SendMessage", word)
-	customMsg := &WXCustomMessage{
-		ToUser:  msg.FromUserName,
-		Msgtype: "text",
-		Text:    &WXText{Content: word},
-	}
-	payloadBytes, err := json.Marshal(customMsg)
-	if err != nil {
-		fmt.Println("[debug] error", err)
-		return
-	}
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequest("POST", "http://api.weixin.qq.com/cgi-bin/message/custom/send", body)
-	if err != nil {
-		fmt.Println("[debug] error", err)
-		return
-	}
-	req.Header.Set("Content-Type", "application/json")
-	fmt.Println("http.DefaultClient.Do", word)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println("[debug] error", err)
-		return
-	}
-	if resp.StatusCode != 200 {
-		fmt.Println("[debug] error status code, code", resp.StatusCode)
-		return
-	}
-	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
-	seqid := resp.Header.Get("x-openapi-seqid")
-	fmt.Println("finish", word, "seqid", seqid)
+	return word
 }
 
 type WXCustomMessage struct {
@@ -279,4 +240,8 @@ type WXCustomMessage struct {
 
 type WXText struct {
 	Content string `json:"content"`
+}
+
+func getKey(msg *model.WXMessage) string {
+	return msg.FromUserName + strconv.Itoa(int(msg.CreateTime))
 }
