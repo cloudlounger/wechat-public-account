@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -38,10 +37,13 @@ func pushQueue(msg *model.WXMessage) {
 	queue <- msg
 }
 
-func loopCheck(key string, ctx context.Context) (quit bool) {
+func loopCheck(key string, cancelC <-chan struct{}) (quit bool) {
 	for {
 		select {
-		case <-ctx.Done():
+		case <-cancelC:
+			quit = true
+			return
+		case <-time.After(5 * time.Second):
 			quit = true
 			return
 		default:
