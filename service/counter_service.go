@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -165,12 +166,14 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	defer body.Close()
 	appid := header.Get("x-wx-from-appid")
 	if appid == "" {
+		fmt.Println("-----------empty appid")
 		w.WriteHeader(400)
 		return
 	}
 	msg := &model.WXMessage{}
 	b, err := ioutil.ReadAll(body)
-	if err != nil {
+	if err != nil && err != io.EOF {
+		fmt.Println("-----------ReadAll failed", err)
 		w.WriteHeader(400)
 		return
 	}
