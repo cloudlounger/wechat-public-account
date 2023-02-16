@@ -183,5 +183,6 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
+	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(200)
 }
