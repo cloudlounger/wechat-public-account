@@ -241,7 +241,7 @@ func SendAsync(msg *model.WXMessage) {
 	customMsg := &WXCustomMessage{
 		ToUser:  msg.FromUserName,
 		Msgtype: "text",
-		Text:    WXText{Content: word},
+		Text:    &WXText{Content: word},
 	}
 	payloadBytes, err := json.Marshal(customMsg)
 	if err != nil {
@@ -270,9 +270,9 @@ func SendAsync(msg *model.WXMessage) {
 }
 
 type WXCustomMessage struct {
-	ToUser  string `json:"touser"`
-	Msgtype string `json:"msgtype"`
-	Text    WXText `json:"text"`
+	ToUser  string  `json:"touser"`
+	Msgtype string  `json:"msgtype"`
+	Text    *WXText `json:"text"`
 }
 
 type WXText struct {
