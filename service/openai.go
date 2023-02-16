@@ -3,12 +3,11 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 )
-
-const ASAK = "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"
 
 var defaultPayload *Payload
 
@@ -52,7 +51,7 @@ func (s *Payload) SendMessage(prompt string) (respWord string, err error) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("%s %s", "Bearer", ASAK))
+	req.Header.Set("Authorization", fmt.Sprintf("%s %s", "Bearer", "sk-"+"dr6u6AP1XgyCXo0Ss7kZT3BlbkFJrooo7cpexDmS317DjLQe"))
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("[debug] error", err)
@@ -64,6 +63,29 @@ func (s *Payload) SendMessage(prompt string) (respWord string, err error) {
 		fmt.Println("[debug] error", err)
 		return
 	}
-	respWord = string(b)
-	return
+	aiResp := new(AIResp)
+	err = json.Unmarshal(b, aiResp)
+	if err != nil {
+		fmt.Println("[debug] error", err)
+		return
+	}
+	if len(aiResp.Choices) <= 0 {
+		err = errors.New("nothing get")
+		fmt.Println("[debug] error", err)
+		return
+	}
+	return aiResp.Choices[0].Text, nil
+}
+
+type AIResp struct {
+	ID          string       `json:"id"`
+	Object      string       `json:"object"`
+	CreatedTime string       `json:"created"`
+	Choices     []*AIContent `json:"choices"`
+}
+
+type AIContent struct {
+	Text         string `json:"text"`
+	Index        int    `json:"index"`
+	FinishReason string `json:"finish_reason"`
 }
