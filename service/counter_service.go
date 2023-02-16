@@ -187,3 +187,9 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(200)
 }
+
+func HelloHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("-----------hello")
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(200)
+}
