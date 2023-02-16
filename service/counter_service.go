@@ -198,6 +198,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	quit := loopCheck(key, r.Cancel)
 	if quit {
+		w.WriteHeader(503)
 		fmt.Println("-----------loopCheck quit")
 		return
 	}
