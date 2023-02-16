@@ -198,6 +198,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	pushQueue(msg)
 	quit := loopCheck(key, r.Context())
 	if quit {
+		fmt.Println("-----------loopCheck quit")
 		return
 	}
 	v, ok := result.Load(key)
@@ -205,6 +206,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
+	fmt.Println("-----------Load", v.(string))
 	b, err = msg.ToResponseJsonStringWithOpenAI(v.(string))
 	if err != nil {
 		w.WriteHeader(500)
@@ -213,6 +215,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 	w.Header().Set("content-type", "application/json")
 	result.Delete(key)
+	fmt.Println("-----------return", v.(string))
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
