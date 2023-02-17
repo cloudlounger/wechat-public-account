@@ -14,12 +14,14 @@ import (
 
 var defaultPayload *Payload
 var cache *sync.Map
+var token *sync.Map
 var queue chan *model.WXMessage
 
 func init() {
 	defaultPayload = NewPayload()
 	cache = new(sync.Map)
-	queue = make(chan *model.WXMessage, 2)
+	token = new(sync.Map)
+	queue = make(chan *model.WXMessage, 4)
 	go func() {
 		for {
 			msg := <-queue
@@ -35,19 +37,20 @@ func pushQueue(msg *model.WXMessage) {
 }
 
 func loopCheck(key string) (quit bool, word string) {
-	c := time.After(3 * time.Second)
+	tick := time.NewTicker(2 * time.Second)
+	defer tick.Stop()
 	for {
 		select {
-		case <-c:
+		case <-tick.C:
 			quit = true
 			return
 		default:
-		}
-		if v, ok := cache.Load(key); !ok {
+			if v, ok := cache.Load(key); ok {
+				word = v.(string)
+				return
+
+			}
 			time.Sleep(200 * time.Millisecond)
-		} else {
-			word = v.(string)
-			return
 		}
 	}
 }
