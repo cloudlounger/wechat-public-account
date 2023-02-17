@@ -161,6 +161,10 @@ func getIndex() (string, error) {
 }
 
 func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusBadGateway)
+	w.Write([]byte{1})
+	time.Sleep(5 * time.Second)
+	return
 	header := r.Header
 	openid := header.Get("x-wx-openid")
 	if openid == "" {
