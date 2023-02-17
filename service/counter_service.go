@@ -198,8 +198,8 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	quit := loopCheck(key, r.Context().Done())
 	if quit {
-		w.WriteHeader(http.StatusGatewayTimeout)
 		fmt.Println("-----------loopCheck quit")
+		time.Sleep(time.Minute)
 		return
 	}
 	v, ok := result.Load(key)
