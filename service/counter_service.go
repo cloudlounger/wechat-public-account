@@ -183,20 +183,22 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("-----------success %+v\n", msg)
 	msg.Content = trim(msg.Content)
 	key := getKey(msg)
+	respWord := ""
 	if _oldWord, ok := cache.Load(key); !ok {
 		pushQueue(msg)
 		quit, word := loopCheck(key)
 		if quit {
-			msg.Content = "我是免费的，请求很慢，请过10s后输出数字1"
+			respWord = "我是免费的, 请求很慢, 请过10s后输出数字 1"
 		} else {
-			msg.Content = word
+			respWord = word
 		}
-		fmt.Println("-----------new call:", quit, word)
+		fmt.Println("-----------new call:", quit, respWord)
 	} else {
-		msg.Content = _oldWord.(string)
-		fmt.Println("-----------old call:", msg.Content)
+		respWord = _oldWord.(string)
+		fmt.Println("-----------old call:", respWord)
+		cache.Delete(key)
 	}
-	b, err = msg.ToResponseJsonStringWithOpenAI()
+	b, err = msg.ToResponseJsonStringWithOpenAI(respWord)
 	if err != nil {
 		w.WriteHeader(500)
 		return

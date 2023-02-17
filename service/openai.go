@@ -35,7 +35,7 @@ func pushQueue(msg *model.WXMessage) {
 }
 
 func loopCheck(key string) (quit bool, word string) {
-	c := time.After(4 * time.Second)
+	c := time.After(3 * time.Second)
 	for {
 		select {
 		case <-c:

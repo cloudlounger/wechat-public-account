@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type WXMessage struct {
@@ -81,9 +82,13 @@ func (s *WXMessage) ToResponseJsonString() ([]byte, error) {
 	return json.Marshal(s)
 }
 
-func (s *WXMessage) ToResponseJsonStringWithOpenAI() ([]byte, error) {
-	toUserName := s.ToUserName
-	s.ToUserName = s.FromUserName
-	s.FromUserName = toUserName
-	return json.Marshal(s)
+func (s *WXMessage) ToResponseJsonStringWithOpenAI(word string) ([]byte, error) {
+	ret := &WXMessage{
+		ToUserName:   s.FromUserName,
+		FromUserName: s.ToUserName,
+		CreateTime:   time.Now().Unix(),
+		MsgType:      s.MsgType,
+		Content:      word,
+	}
+	return json.Marshal(ret)
 }
