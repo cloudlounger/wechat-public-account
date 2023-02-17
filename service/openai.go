@@ -23,7 +23,7 @@ func init() {
 	go func() {
 		for {
 			msg := <-queue
-			key := getKey(msg)
+			key := msg.FromUserName + "1"
 			word := SendAsync(msg)
 			cache.Store(key, word)
 		}
