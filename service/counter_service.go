@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"wxcloudrun-golang/db/dao"
@@ -217,7 +218,6 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("-----------hello")
 	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(200)
 }
 
 func SendAsync(msg *model.WXMessage) string {
@@ -227,6 +227,7 @@ func SendAsync(msg *model.WXMessage) string {
 		fmt.Println("[debug] defaultPayload.SendMessage failed, error", err)
 		return ""
 	}
+	word = strings.TrimSpace(word)
 	fmt.Println("finish SendMessage", word)
 	return word
 }
