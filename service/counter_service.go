@@ -161,7 +161,6 @@ func getIndex() (string, error) {
 }
 
 func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(5 * time.Second)
 	header := r.Header
 	body := r.Body
 	defer body.Close()
