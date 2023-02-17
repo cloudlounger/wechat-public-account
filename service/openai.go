@@ -25,7 +25,7 @@ func init() {
 	go func() {
 		for {
 			msg := <-queue
-			key := msg.FromUserName + "1"
+			key := msg.FromUserName
 			word := SendAsync(msg)
 			cache.Store(key, word)
 		}
@@ -48,7 +48,6 @@ func loopCheck(key string) (quit bool, word string) {
 			if v, ok := cache.Load(key); ok {
 				word = v.(string)
 				return
-
 			}
 			time.Sleep(200 * time.Millisecond)
 		}

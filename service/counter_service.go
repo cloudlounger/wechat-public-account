@@ -181,18 +181,19 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("-----------success %+v\n", msg)
-	msg.Content = trim(msg.Content)
-	key := getKey(msg)
-	respWord := ""
-	if _, ok := token.LoadOrStore(msg.FromUserName, struct{}{}); !ok {
-		pushQueue(msg)
+	if trim(msg.Content) != "1" {
+		if _, ok := token.LoadOrStore(msg.FromUserName, struct{}{}); !ok {
+			pushQueue(msg)
+		}
 	}
+	key := msg.FromUserName
+	respWord := ""
 	quit, word := loopCheck(key)
 	if quit {
 		respWord = "\n我是免费的, 请求很慢, 上个请求还没处理完. 请过10s后输出数字 1"
 	} else {
 		respWord = word
-		cache.Delete(msg.FromUserName + "1")
+		cache.Delete(msg.FromUserName)
 		token.Delete(msg.FromUserName)
 	}
 	fmt.Println("-----------call:", msg.Content, "resp:", respWord)
