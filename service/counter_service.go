@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -161,16 +160,7 @@ func getIndex() (string, error) {
 }
 
 func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
-	return
 	header := r.Header
-	body := r.Body
-	defer body.Close()
-	//appid := header.Get("x-wx-from-appid")
-	//if appid == "" {
-	//	fmt.Println("-----------empty appid")
-	//	w.WriteHeader(400)
-	//	return
-	//}
 	openid := header.Get("x-wx-openid")
 	if openid == "" {
 		fmt.Println("-----------empty openid")
@@ -179,8 +169,8 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("-----------x-wx-openid", openid)
 	msg := &model.WXMessage{}
-	b, err := ioutil.ReadAll(body)
-	if err != nil && err != io.EOF {
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
 		fmt.Println("-----------ReadAll failed", err)
 		w.WriteHeader(400)
 		return
@@ -199,7 +189,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	quit := loopCheck(key, r.Context().Done())
 	if quit {
-		fmt.Println("-----------loopCheck quit")
+		fmt.Println("-----------loopCheck quit, key:", key)
 		return
 	}
 	v, ok := result.Load(key)
@@ -207,7 +197,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	fmt.Println("-----------Load", v.(string))
+	fmt.Println("-----------Load:", v.(string))
 	b, err = msg.ToResponseJsonStringWithOpenAI(v.(string))
 	if err != nil {
 		w.WriteHeader(500)
