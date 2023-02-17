@@ -14,21 +14,18 @@ import (
 
 var defaultPayload *Payload
 var cache *sync.Map
-var result *sync.Map
 var queue chan *model.WXMessage
 
 func init() {
 	defaultPayload = NewPayload()
 	cache = new(sync.Map)
-	result = new(sync.Map)
 	queue = make(chan *model.WXMessage, 2)
 	go func() {
 		for {
 			msg := <-queue
 			key := getKey(msg)
 			word := SendAsync(msg)
-			result.Store(key, word)
-			cache.Delete(key)
+			cache.Store(key, word)
 		}
 	}()
 }
@@ -37,21 +34,19 @@ func pushQueue(msg *model.WXMessage) {
 	queue <- msg
 }
 
-func loopCheck(key string, done <-chan struct{}) (quit bool) {
+func loopCheck(key string) (quit bool, word string) {
 	c := time.After(4 * time.Second)
 	for {
 		select {
-		case <-done:
-			quit = true
-			return
 		case <-c:
 			quit = true
 			return
 		default:
 		}
-		if _, ok := cache.Load(key); ok {
+		if v, ok := cache.Load(key); !ok {
 			time.Sleep(200 * time.Millisecond)
 		} else {
+			word = v.(string)
 			return
 		}
 	}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -161,11 +160,6 @@ func getIndex() (string, error) {
 }
 
 func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("~~~~~~~~~~~~~~~~~~~~~")
-	w.WriteHeader(http.StatusBadGateway)
-	w.Write([]byte{1})
-	time.Sleep(5 * time.Second)
-	return
 	header := r.Header
 	openid := header.Get("x-wx-openid")
 	if openid == "" {
@@ -187,25 +181,23 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("-----------success %+v\n", msg)
-
+	var word string
+	msg.Content = trim(msg.Content)
 	key := getKey(msg)
-	if _, ok := cache.Load(key); !ok {
-		cache.Store(key, struct{}{})
+	if _oldWord, ok := cache.Load(key); !ok {
 		pushQueue(msg)
+		quit, word := loopCheck(key)
+		if quit {
+			msg.Content = "我是免费的，请求很慢，请过10s后输出数字1"
+		} else {
+			msg.Content = word
+		}
+		fmt.Println("-----------new call:", quit, word)
+	} else {
+		msg.Content = _oldWord.(string)
+		fmt.Println("-----------old call:", msg.Content)
 	}
-	quit := loopCheck(key, r.Context().Done())
-	if quit {
-		fmt.Println("-----------loopCheck quit, key:", key)
-		return
-	}
-	v, ok := result.Load(key)
-	if !ok {
-		w.WriteHeader(500)
-		return
-	}
-	fmt.Println("-----------Load:", v.(string))
-
-	b, err = msg.ToResponseJsonStringWithOpenAI(v.(string))
+	b, err = msg.ToResponseJsonStringWithOpenAI()
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -216,7 +208,6 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	result.Delete(key)
 	fmt.Println("-----------return", msg)
 }
 
@@ -248,5 +239,13 @@ type WXText struct {
 }
 
 func getKey(msg *model.WXMessage) string {
-	return msg.FromUserName + strconv.Itoa(int(msg.CreateTime))
+	return msg.FromUserName + msg.Content
+}
+
+func trim(content string) string {
+	v := strings.TrimSpace(content)
+	if len(v) > 0 && v[0] == 1 {
+		return "1"
+	}
+	return content
 }
