@@ -19,5 +19,5 @@ func main() {
 	http.HandleFunc("/api/hello", service.HelloHandler)
 	http.HandleFunc("/api/message", service.WXMessageHandler)
 
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
