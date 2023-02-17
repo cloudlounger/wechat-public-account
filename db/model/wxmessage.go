@@ -52,21 +52,21 @@ func (s *WXMessage) ToResponseXMLString() []byte {
 	var ret strings.Builder
 	ret.WriteString("<xml>\n")
 
-	ret.WriteString("<ToUserName><![CDATA[")
+	ret.WriteString("  <ToUserName><![CDATA[")
 	ret.WriteString(s.FromUserName)
 	ret.WriteString("]]></ToUserName>\n")
 
-	ret.WriteString("<FromUserName><![CDATA[")
+	ret.WriteString("  <FromUserName><![CDATA[")
 	ret.WriteString(s.ToUserName)
 	ret.WriteString("]]></FromUserName>\n")
 
-	ret.WriteString("<CreateTime>")
+	ret.WriteString("  <CreateTime>")
 	ret.WriteString(strconv.Itoa(int(s.CreateTime)))
 	ret.WriteString("</CreateTime>\n")
 
-	ret.WriteString("<MsgType><![CDATA[text]]></MsgType>\n")
+	ret.WriteString("  <MsgType><![CDATA[text]]></MsgType>\n")
 
-	ret.WriteString("<Content><![CDATA[")
+	ret.WriteString("  <Content><![CDATA[")
 	ret.WriteString(s.Content)
 	ret.WriteString("]]></Content>\n")
 
