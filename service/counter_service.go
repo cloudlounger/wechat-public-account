@@ -181,7 +181,6 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("-----------success %+v\n", msg)
-	var word string
 	msg.Content = trim(msg.Content)
 	key := getKey(msg)
 	if _oldWord, ok := cache.Load(key); !ok {
