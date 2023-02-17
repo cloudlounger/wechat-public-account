@@ -198,12 +198,15 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("-----------Load:", v.(string))
-	b, err = msg.ToResponseJsonStringWithOpenAI(v.(string))
-	if err != nil {
-		w.WriteHeader(500)
-		return
-	}
-	w.Header().Set("content-type", "application/json")
+	/*
+		b, err = msg.ToResponseJsonStringWithOpenAI(v.(string))
+		if err != nil {
+			w.WriteHeader(500)
+			return
+		}
+	*/
+	msg.Content = v.(string)
+	b = msg.ToResponseXMLString()
 	_, err = w.Write(b)
 	if err != nil {
 		w.WriteHeader(500)
