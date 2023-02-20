@@ -208,6 +208,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 	fmt.Println("-----------return", msg)
 }
 
