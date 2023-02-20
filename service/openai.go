@@ -37,7 +37,7 @@ func pushQueue(msg *model.WXMessage) {
 }
 
 func loopCheck(key string) (quit bool, word string) {
-	tick := time.NewTicker(2 * time.Second)
+	tick := time.NewTicker(15 * time.Second)
 	defer tick.Stop()
 	for {
 		select {

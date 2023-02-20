@@ -190,7 +190,7 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	respWord := ""
 	quit, word := loopCheck(key)
 	if quit {
-		respWord = "\n我是免费的, 请求很慢, 上个请求还没处理完. 请过10s后输出数字 1"
+		respWord = "请求处理中. 请过10s后输出数字 1"
 	} else {
 		respWord = word
 		cache.Delete(msg.FromUserName)
