@@ -38,15 +38,16 @@ func pushQueue(msg *model.WXMessage) {
 
 func loopCheck(key string) (quit bool, word string) {
 	tick := time.NewTicker(15 * time.Second)
-	defer tick.Stop()
 	for {
 		select {
 		case <-tick.C:
 			quit = true
+			tick.Stop()
 			return
 		default:
 			if v, ok := cache.Load(key); ok {
 				word = v.(string)
+				tick.Stop()
 				return
 			}
 			time.Sleep(200 * time.Millisecond)
