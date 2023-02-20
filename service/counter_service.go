@@ -160,27 +160,20 @@ func getIndex() (string, error) {
 }
 
 func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
-	header := r.Header
-	openid := header.Get("x-wx-openid")
-	if openid == "" {
-		fmt.Println("-----------empty openid")
-		w.WriteHeader(400)
-		return
-	}
-	fmt.Println("-----------x-wx-openid", openid)
 	msg := &model.WXMessage{}
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("-----------ReadAll failed", err)
+		fmt.Println("[Error] ReadAll failed", err)
 		w.WriteHeader(400)
 		return
 	}
 	err = json.Unmarshal(b, msg)
 	if err != nil {
+		fmt.Println("[Error] Unmarshal failed", err)
 		w.WriteHeader(400)
 		return
 	}
-	fmt.Printf("-----------success %+v\n", msg)
+	fmt.Printf("[debug] success %+v\n", msg)
 	if trim(msg.Content) != "1" {
 		if _, ok := token.LoadOrStore(msg.FromUserName, struct{}{}); !ok {
 			pushQueue(msg)
@@ -190,13 +183,13 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 	respWord := ""
 	quit, word := loopCheck(key)
 	if quit {
-		respWord = "请求处理中. 请过10s后输出数字 1"
+		respWord = "请求处理中. 请过10s后输出数字1"
 	} else {
 		respWord = word
 		cache.Delete(msg.FromUserName)
 		token.Delete(msg.FromUserName)
 	}
-	fmt.Println("-----------call:", msg.Content, "resp:", respWord)
+	fmt.Println("[debug] get openai response:", msg.Content, "resp:", respWord)
 	b, err = msg.ToResponseJsonStringWithOpenAI(respWord)
 	if err != nil {
 		w.WriteHeader(500)
@@ -208,8 +201,12 @@ func WXMessageHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	fmt.Println("-----------return", msg)
+	select {
+	case <-r.Context().Done():
+		fmt.Println("[check context] done")
+	default:
+	}
+	fmt.Println("[debug] return", msg)
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
@@ -218,14 +215,14 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendAsync(msg *model.WXMessage) string {
-	fmt.Println("begin SendMessage", msg.Content)
+	fmt.Println("[openapi] send message", msg.Content)
 	word, err := defaultPayload.SendMessage(msg.Content)
 	if err != nil {
 		fmt.Println("[debug] defaultPayload.SendMessage failed, error", err)
 		return ""
 	}
 	word = strings.TrimSpace(word)
-	fmt.Println("finish SendMessage", word)
+	fmt.Println("[openapi] get response", word)
 	return word
 }
 
